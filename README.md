@@ -43,6 +43,12 @@ git clone <repository-url>
 cd <repository-name>
 ```
 
+### 2. Create and Activate Virtual Environment
+```sh
+python3 -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+```
+
 ### 2. Install Dependencies
 ```sh
 pip install -r requirements.txt
