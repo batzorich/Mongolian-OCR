@@ -39,8 +39,8 @@ This service extracts text from Image and returns the extracted dext as a JSON r
 
 ### 1. Clone the Repository
 ```sh
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/batzorich/Mongolian-OCR.git
+cd Mongolian-OCR
 ```
 
 ### 2. Create and Activate Virtual Environment
