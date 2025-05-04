@@ -2,12 +2,8 @@ import cv2
 import numpy as np
 from collections import Counter
 
-from src.segmentation_contour import segment_contours
-from src.segmentation_line import segment_lines
-from src.segmentation_word import segment_words
-
 def character_segmentation_light(image):
-
+    
     _, binary = cv2.threshold(image, 160, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -43,29 +39,9 @@ def find_letter_ratio(image):
     
     return height_width_list
 
-def get_word_images_from_raw(img):
-    contour_images = segment_contours(img)
-    line_images_all = []
-    for i in range(len(contour_images)):
-        line_images = segment_lines(contour_images[i])
-        if line_images != None:
-            for single_line in line_images:
-                if single_line.shape[0] > 10:
-                    line_images_all.append(single_line)
-    
-    words_images = []
-    for i in range(len(line_images_all)):
-        words = segment_words(line_images_all[i])
-        words_images.append(words)
-    return words_images
-
 def get_width_height_ratio(img):
-    words_images = get_word_images_from_raw(img)
 
-    list_ratio = []
-    for words in words_images:
-        for word in words:
-            list_ratio += find_letter_ratio(word)
+    list_ratio = find_letter_ratio(img)
     
     counter_lower = Counter(list_ratio)
     median_lower = counter_lower.most_common(1)[0]
