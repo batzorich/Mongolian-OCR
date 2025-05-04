@@ -54,12 +54,15 @@ source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Run Locally
-```sh
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
+### 3. Run from Notebook
+Open the demonstration notebook at `notebook/demonstration.ipynb`.  
+Set the image path in the notebook (e.g., `../test_imgs/img_001.jpg`).  
+Run the cells to extract and display the recognized text.
+
 
 ## Docker Setup
+
+> ⚠️ If Docker is not installed, follow the [official Docker installation guide](https://docs.docker.com/get-docker/) for your OS.
 
 ### 1. Build the Docker Image
 ```sh
