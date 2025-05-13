@@ -17,7 +17,7 @@ def skew_correct(img):
     sobel_img_inv = 255 - sobel_img
     correction_angle = 0
     highest_hp = 0
-    for index, angle in enumerate(range(-5, 5)):
+    for angle in np.arange(-5, 5.1, 0.1):
         hp = horizontal_projection_skew(rotate(sobel_img_inv, angle))
         median_hp = np.median(hp)
         if highest_hp < median_hp:

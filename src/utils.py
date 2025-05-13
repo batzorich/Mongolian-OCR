@@ -22,3 +22,16 @@ def reshape_image(image, scale_index):
     resized_image = cv2.resize(image, (new_width, height))
     
     return resized_image
+
+def count_consecutive(bool_list):
+    result = []
+    i = 0
+    n = len(bool_list)
+    while i < n:
+        val = bool_list[i]
+        count = 0
+        while i < n and bool_list[i] == val:
+            count += 1
+            i += 1
+        result.append((count, 0) if not val else (0, count))
+    return result

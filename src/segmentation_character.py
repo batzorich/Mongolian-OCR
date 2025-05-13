@@ -110,7 +110,6 @@ def character_segmentation(image, mean_w):
 
     contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0])
 
-    bboxes = []
     merged_contours = []
     skip_indices = set()
 
@@ -137,16 +136,16 @@ def character_segmentation(image, mean_w):
     
     median_lower_y = np.median([cv2.boundingRect(ctr)[1] for ctr in merged_contours])
     result_chars = []
-    
+    bboxes = []
+    long_flag = []
     for i in range(len(merged_contours)):
         x, y, w, h = cv2.boundingRect(merged_contours[i])
         # Check if character height is much smaller than the width (indicating possible multi-letter segmentation)
         if w >= 2 and h >= 2:  # Ensure the character is large enough 10
             #if h * 1.2 < w and h * 2 > w:  # If the width is much larger than the height, check the middle column
             
-            if mean_w * 1.5 < w < mean_w * 2.8:
+            if mean_w * 1.8 < w < mean_w * 2.8:
                 char_img = binary[y:y + h, x:x + w]
-                
                 wh_ratio = w / h
                 w_ratio = w / mean_w
                 mid_x = x + w // 2
@@ -170,49 +169,28 @@ def character_segmentation(image, mean_w):
                         (pred == 'Ю' and max_hmean > 50)
                     )
 
-                if should_add:
+                if should_add and np.sum(char_img[0]) < 2200:
                     char, bbox_y = trim_black_rows(char_img, x, y)
                     result_chars.append(char)
                     bboxes.append(bbox_y)
+                    long_flag.append(False)
                 else:
                     mid_x = max(find_fit_x(binary, mid_x), x + 7) if min_hmean <= 40 or max_hmean <= 40 else mid_x
                     left_char, left_bbox_y = trim_black_rows(binary[y:y + h, x:mid_x], x, y)
                     right_char, right_bbox_y = trim_black_rows(binary[y:y + h, mid_x:x + w], mid_x, y)
                     result_chars += [left_char, right_char]
                     bboxes += [left_bbox_y, right_bbox_y]
-
-
-            elif mean_w * 2.8 <= w:  # If width is much larger than height, split into 3 parts
-                list_width_short = []
-                num_chars = int(0.5+w/(mean_w+1)) # 1 pixel for space
-                
-                left_x = x
-                for idx_char in range(num_chars-1):
-                    right_x = x + w // num_chars * (idx_char+1)
-                    right_x = find_fit_x(binary, right_x)
-
-                    list_width_short.append(right_x-left_x)
-                    left_x = right_x
-                list_width_short.append(x+w-left_x)
-
-                if any(a < mean_w and b < mean_w for a, b in zip(list_width_short, list_width_short[1:])):
-                    num_chars -= 1
-                
-                left_x = x
-                for idx_char in range(num_chars-1):
-                    right_x = x + w // num_chars * (idx_char+1)
-                    right_x = find_fit_x(binary, right_x)
-                    right_char, right_bbox_y = trim_black_rows(binary[y:y + h, left_x:right_x], left_x, y)
-                    result_chars.append(right_char)
-                    bboxes.append(right_bbox_y)
-                    left_x = right_x
-                right_char, right_bbox_y = trim_black_rows(binary[y:y + h, left_x:x+w], left_x, y)
-                result_chars.append(right_char)
-                bboxes.append(right_bbox_y)
-
+                    long_flag += [False, False]
             else:
                 # If the character is not too wide, add the entire character
                 char, bbox_y = trim_black_rows(binary[y:y + h, x:x + w], x, y)
-                result_chars.append(char)
-                bboxes.append(bbox_y)
-    return result_chars, bboxes
+                
+                if w>= mean_w*2.8:
+                    result_chars.append(image[y:y + h, x:x + w])
+                    bboxes.append(bbox_y)
+                    long_flag.append(True)
+                else:
+                    result_chars.append(char)
+                    bboxes.append(bbox_y)
+                    long_flag.append(False)
+    return result_chars, bboxes, long_flag
